@@ -1,0 +1,162 @@
+/* ==========================================================================
+   背景层：柔光斑 + 可选墙纸 + 细噪点（全部 fixed，不参与滚动的重绘）
+   以及昼夜切换的圆形揭幕（View Transition）
+   ========================================================================== */
+
+.site-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--bg-base);
+}
+
+.site-backdrop-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.95;
+  will-change: transform;
+  transition: background-color var(--dur-theme) var(--ease-in-out);
+}
+
+.site-backdrop-blob[data-blob="a"] {
+  top: -18%;
+  left: -12%;
+  width: 58vw;
+  height: 58vw;
+  background: var(--blob-a);
+  animation: blob-drift-a 26s var(--ease-in-out) infinite alternate;
+}
+
+.site-backdrop-blob[data-blob="b"] {
+  top: 6%;
+  right: -16%;
+  width: 46vw;
+  height: 46vw;
+  background: var(--blob-b);
+  animation: blob-drift-b 32s var(--ease-in-out) infinite alternate;
+}
+
+.site-backdrop-blob[data-blob="c"] {
+  bottom: -22%;
+  left: 18%;
+  width: 52vw;
+  height: 52vw;
+  background: var(--blob-c);
+  animation: blob-drift-c 38s var(--ease-in-out) infinite alternate;
+}
+
+.site-backdrop-blob[data-blob="d"] {
+  bottom: 8%;
+  right: 6%;
+  width: 30vw;
+  height: 30vw;
+  background: var(--blob-d);
+  animation: blob-drift-a 30s var(--ease-in-out) infinite alternate-reverse;
+}
+
+@keyframes blob-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6vw, 4vh, 0) scale(1.12);
+  }
+}
+
+@keyframes blob-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  to {
+    transform: translate3d(-5vw, 6vh, 0) scale(0.94);
+  }
+}
+
+@keyframes blob-drift-c {
+  from {
+    transform: translate3d(0, 0, 0) scale(0.96);
+  }
+  to {
+    transform: translate3d(4vw, -5vh, 0) scale(1.1);
+  }
+}
+
+/* 可选墙纸：在 config 中设置 site.backdrop.wallpaper 后显示 */
+.site-backdrop-wallpaper {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.35;
+  transition: opacity var(--dur-theme) var(--ease-in-out);
+}
+
+[data-theme="dark"] .site-backdrop-wallpaper {
+  opacity: 0.22;
+}
+
+/* 雾化层：让玻璃卡片与背景之间保持足够的文字对比度 */
+.site-backdrop-veil {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-veil);
+  backdrop-filter: blur(2px);
+  transition: background-color var(--dur-theme) var(--ease-in-out);
+}
+
+@media (max-width: 767px) {
+  .site-backdrop-blob {
+    filter: blur(60px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   昼夜切换：从切换按钮的位置向外扩散的圆形揭幕
+   -------------------------------------------------------------------------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+}
+
+html.theme-vt::view-transition-new(root) {
+  animation: theme-reveal 780ms var(--ease-out) both;
+}
+
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0 at var(--theme-x, 50%) var(--theme-y, 0%));
+  }
+  to {
+    clip-path: circle(var(--theme-r, 150vmax) at var(--theme-x, 50%) var(--theme-y, 0%));
+  }
+}
+
+/* 不支持 View Transition 时：靠 html.theme-anim 的变量插值完成平滑过渡 */
+html.theme-anim .site-backdrop-blob,
+html.theme-anim .site-backdrop-veil {
+  transition:
+    background-color var(--dur-theme) var(--ease-in-out),
+    opacity var(--dur-theme) var(--ease-in-out) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-backdrop-blob {
+    animation: none !important;
+  }
+
+  html.theme-vt::view-transition-new(root) {
+    animation: none !important;
+  }
+}

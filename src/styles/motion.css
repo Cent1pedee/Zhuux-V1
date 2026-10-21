@@ -1,0 +1,544 @@
+/* ==========================================================================
+   动效体系：页面切换淡入、路由加载线、首屏入场、卡片光斑、打字光标
+   全部在 prefers-reduced-motion 下关闭（PRD「动效降级」）
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   页面切换：内容 260ms 淡入 + 轻微上移；切换时顶部出现一条渐隐的加载线
+   -------------------------------------------------------------------------- */
+.page-enter {
+  animation: page-enter var(--dur-page) var(--ease-out) both;
+}
+
+/* 路由切换时由 PageTransition 重新挂载的内层容器播放淡入（不引起布局偏移） */
+.page-enter-transition {
+  animation: page-enter var(--dur-page) var(--ease-out) both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.route-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 100%;
+  z-index: 60;
+  height: 2px;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+
+.route-progress.is-active {
+  opacity: 1;
+}
+
+.route-progress span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-primary), color-mix(in oklab, #22d3ee 70%, var(--color-primary)), transparent);
+  animation: route-progress 700ms var(--ease-in-out) infinite;
+}
+
+@keyframes route-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(350%);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   首屏入场（仅首屏元素，轻微上移，不阻塞 LCP 以外内容）
+   -------------------------------------------------------------------------- */
+.stagger > * {
+  animation: rise-in 520ms var(--ease-out) both;
+}
+
+.stagger > *:nth-child(1) {
+  animation-delay: 40ms;
+}
+
+.stagger > *:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+.stagger > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.stagger > *:nth-child(4) {
+  animation-delay: 190ms;
+}
+
+.stagger > *:nth-child(5) {
+  animation-delay: 240ms;
+}
+
+.stagger > *:nth-child(6) {
+  animation-delay: 290ms;
+}
+
+.stagger > *:nth-child(n + 7) {
+  animation-delay: 330ms;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   卡片 hover 光斑：跟随指针的柔光（桌面精细指针）
+   -------------------------------------------------------------------------- */
+.glow-card {
+  --mx: 50%;
+  --my: 0%;
+}
+
+.glow-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    320px circle at var(--mx) var(--my),
+    color-mix(in oklab, var(--color-primary) 10%, transparent),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .glow-card:hover::before {
+    opacity: 1;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   链接下划线从左侧展开（正文链接已有下划线标识，这里只用于卡片标题等非纯文本链接）
+   -------------------------------------------------------------------------- */
+.underline-grow {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size var(--dur-fast) var(--ease-out);
+}
+
+.underline-grow:hover {
+  background-size: 100% 1px;
+}
+
+/* --------------------------------------------------------------------------
+   打字机光标呼吸（打字结束后隐藏）
+   -------------------------------------------------------------------------- */
+.type-caret {
+  animation: caret-blink 1s steps(1) infinite;
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* 主题切换：即时切换色值，不做过场动画（避免闪烁） */
+html,
+body {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .page-enter-transition,
+  .stagger > *,
+  .route-progress span,
+  .type-caret,
+  .hero-aurora,
+  .shine-text,
+  .avatar-ring::after,
+  .status-dot,
+  .hero-scroll-cue::after,
+  .notfound-code {
+    animation: none !important;
+  }
+
+  .page-enter-transition,
+  .stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   细节动效包：卡片高光、列表错峰入场、时间线绘制、下拉弹入、按钮按压
+   全部只作用于 transform / opacity / filter，且减少动效时由全局规则关闭
+   ========================================================================== */
+
+/* 卡片悬停高光：一道斜向扫光，只用于可点击卡片，避免整页闪烁 */
+.card-surface[data-interactive="true"] {
+  overflow: hidden;
+}
+
+.card-surface[data-interactive="true"]::after {
+  content: "";
+  position: absolute;
+  inset: -40% -10%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 38%,
+    color-mix(in oklab, #ffffff 16%, transparent) 48%,
+    transparent 58%
+  );
+  transform: translateX(-120%);
+  opacity: 0;
+  transition: opacity 120ms var(--ease-out);
+}
+
+[data-theme="dark"] .card-surface[data-interactive="true"]::after {
+  background: linear-gradient(
+    110deg,
+    transparent 38%,
+    color-mix(in oklab, #ffffff 9%, transparent) 48%,
+    transparent 58%
+  );
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-surface[data-interactive="true"]:hover::after {
+    opacity: 1;
+    animation: card-sheen 900ms var(--ease-out);
+  }
+}
+
+@keyframes card-sheen {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+
+/* 卡片内容位于扫光之上 */
+.card-surface[data-interactive="true"] > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 列表错峰入场：容器 key 变化（筛选/切标签）时整体重挂载并重播 */
+.stagger-list > .stagger-item {
+  animation: list-item-in 440ms var(--ease-out) backwards;
+}
+
+.stagger-list > .stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-list > .stagger-item:nth-child(2) { animation-delay: 50ms; }
+.stagger-list > .stagger-item:nth-child(3) { animation-delay: 100ms; }
+.stagger-list > .stagger-item:nth-child(4) { animation-delay: 150ms; }
+.stagger-list > .stagger-item:nth-child(5) { animation-delay: 200ms; }
+.stagger-list > .stagger-item:nth-child(6) { animation-delay: 250ms; }
+.stagger-list > .stagger-item:nth-child(n + 7) { animation-delay: 290ms; }
+
+@keyframes list-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 卡片在 .stagger-item 内部撑满高度，保证网格等高 */
+.stagger-item {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stagger-item > * {
+  flex: 1;
+}
+
+/* 首页经历时间线：连线自上而下绘制，节点依次点亮 */
+.xp-timeline::before {
+  animation: timeline-grow 900ms var(--ease-out) both;
+}
+
+@keyframes timeline-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.xp-timeline-item .xp-timeline-node {
+  animation: node-pop 420ms var(--ease-spring) both;
+}
+
+.xp-timeline-item:nth-child(1) .xp-timeline-node { animation-delay: 120ms; }
+.xp-timeline-item:nth-child(2) .xp-timeline-node { animation-delay: 300ms; }
+.xp-timeline-item:nth-child(3) .xp-timeline-node { animation-delay: 480ms; }
+
+@keyframes node-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 下拉搜索结果：轻弹出现 */
+.search-results {
+  animation: pop-in 180ms var(--ease-out) both;
+  transform-origin: top center;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 提示条：从上方滑入 */
+.inline-notice {
+  animation: notice-in 220ms var(--ease-out) both;
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 按钮按压反馈：只做极轻微的缩放，不移动布局 */
+.btn-primary-solid:active,
+.btn-outline-primary:active,
+.btn-text:active,
+.chip:active {
+  transform: scale(0.97);
+}
+
+.btn-primary-solid,
+.btn-outline-primary {
+  will-change: transform;
+}
+
+/* 主题按钮图标：切换时轻微旋转（状态另有 aria-pressed） */
+.theme-toggle-btn svg {
+  transition: transform 420ms var(--ease-spring);
+}
+
+.theme-toggle-btn:hover svg {
+  transform: rotate(18deg);
+}
+
+/* 页面切换：在淡入基础上加一点景深 */
+.page-enter-transition {
+  animation: page-depth-in 320ms var(--ease-out) both;
+}
+
+@keyframes page-depth-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.997);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-surface[data-interactive="true"]:hover::after,
+  .stagger-list > .stagger-item,
+  .xp-timeline::before,
+  .xp-timeline-item .xp-timeline-node,
+  .search-results,
+  .inline-notice,
+  .page-enter-transition {
+    animation: none !important;
+  }
+
+  .card-surface[data-interactive="true"]::after {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   项目筛选与详情翻页
+   ========================================================================== */
+
+/* 结果数量变化时轻微弹一下，强调「筛选已生效」 */
+.filter-count {
+  display: inline-block;
+  animation: count-pop 320ms var(--ease-spring) both;
+}
+
+@keyframes count-pop {
+  from {
+    opacity: 0.4;
+    transform: scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 当前条件 chip 出现时淡入 */
+.filter-chip-in {
+  animation: chip-in 220ms var(--ease-out) backwards;
+}
+
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 详情页翻页：新内容从对应方向滑入 */
+.pager-shell {
+  min-width: 0;
+}
+
+.pager-enter-next {
+  animation: pager-in-next 340ms var(--ease-out) backwards;
+}
+
+.pager-enter-prev {
+  animation: pager-in-prev 340ms var(--ease-out) backwards;
+}
+
+@keyframes pager-in-next {
+  from {
+    opacity: 0;
+    transform: translateX(36px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pager-in-prev {
+  from {
+    opacity: 0;
+    transform: translateX(-36px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 翻页链接：hover 时箭头向对应方向移动 */
+.pager-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color var(--dur-micro) var(--ease-out);
+}
+
+.pager-link .pager-arrow {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.pager-link:hover .pager-arrow[data-dir="next"] {
+  transform: translateX(4px);
+}
+
+.pager-link:hover .pager-arrow[data-dir="prev"] {
+  transform: translateX(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filter-count,
+  .filter-chip-in,
+  .pager-enter-next,
+  .pager-enter-prev {
+    animation: none !important;
+  }
+}
+
+/* 工具栏：结果计数变化时轻微强调，条件 chip 逐项淡入 */
+.toolbar-count strong {
+  display: inline-block;
+  animation: count-pop 320ms var(--ease-spring) both;
+}
+
+.toolbar .chip-row li {
+  animation: chip-in 220ms var(--ease-out) backwards;
+}
+
+.toolbar .chip-row li:nth-child(n + 9) {
+  animation-delay: 60ms;
+}
+
+/* 分段排序：切换时白底滑块轻微按压反馈 */
+.seg-toggle button[aria-pressed="true"] {
+  animation: seg-press 260ms var(--ease-spring);
+}
+
+@keyframes seg-press {
+  from {
+    transform: scale(0.96);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolbar-count strong,
+  .toolbar .chip-row li,
+  .seg-toggle button[aria-pressed="true"] {
+    animation: none !important;
+  }
+}

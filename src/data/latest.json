@@ -1,0 +1,31 @@
+{
+  "_comment": "⚠️ 示例假数据 · P2「最近动态」。替换为真实内容即可；接入 RSS/API 时在 source 中登记来源",
+  "source": {
+    "kind": "static",
+    "label": "静态维护（src/data/latest.json）"
+  },
+  "latestStatus": {
+    "text": "正在寻找前端架构方向的机会",
+    "updatedAt": "2026-10-12"
+  },
+  "items": [
+    {
+      "type": "article",
+      "title": "把首屏 LCP 从 4.2s 压到 1.9s 的六个决策",
+      "href": "/articles/lcp-from-4s-to-2s/",
+      "date": "2026-10-08"
+    },
+    {
+      "type": "chatter",
+      "title": "把构建缓存命中率从 12% 拉到 91%",
+      "href": "/chatters/build-cache-hit-rate/",
+      "date": "2026-10-14"
+    },
+    {
+      "type": "article",
+      "title": "为什么我们放弃了全量 SSR：一次渲染策略的复盘",
+      "href": "/articles/ssg-vs-ssr-rethink/",
+      "date": "2026-08-30"
+    }
+  ]
+}

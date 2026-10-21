@@ -1,0 +1,34 @@
+{
+  "name": "tech-profile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "技术型个人主页（Next.js SSG 静态导出 + Tailwind CSS + daisyUI）",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build && node scripts/publish-data.mjs",
+    "start": "pnpm dlx serve@14 out -l 3000",
+    "new:project": "node scripts/new-project.mjs",
+    "new:article": "node scripts/new-article.mjs",
+    "new:chatter": "node scripts/new-chatter.mjs"
+  },
+  "dependencies": {
+    "next": "^15.5.28",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/postcss": "4.1.18",
+    "@types/node": "22.15.30",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "axe-core": "4.10.3",
+    "daisyui": "5.7.50",
+    "tailwindcss": "4.1.18",
+    "typescript": "5.9.2"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=18.18"
+  }
+}

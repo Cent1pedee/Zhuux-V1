@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="400" viewBox="0 0 1000 400" role="img" aria-label="perf-lens 性能对比封面">
+  <rect width="1000" height="400" fill="#0f172a"/>
+  <g stroke="#1e293b" stroke-width="2">
+    <path d="M80 320h840"/>
+    <path d="M80 240h840"/>
+    <path d="M80 160h840"/>
+    <path d="M80 80h840"/>
+  </g>
+  <g fill="#3b82f6">
+    <rect x="120" y="120" width="56" height="200" rx="6" opacity="0.45"/>
+    <rect x="196" y="180" width="56" height="140" rx="6" opacity="0.45"/>
+    <rect x="272" y="210" width="56" height="110" rx="6" opacity="0.45"/>
+  </g>
+  <g fill="#3b82f6">
+    <rect x="420" y="210" width="56" height="110" rx="6"/>
+    <rect x="496" y="250" width="56" height="70" rx="6"/>
+    <rect x="572" y="270" width="56" height="50" rx="6"/>
+  </g>
+  <path d="m140 128 78 62 78 40 140 0 78 46 78 20" fill="none" stroke="#93c5fd" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <g font-family="Menlo, monospace" font-size="16" fill="#94a3b8">
+    <text x="120" y="360">before</text>
+    <text x="420" y="360" fill="#bfdbfe">after</text>
+    <text x="760" y="360">LCP · p75</text>
+  </g>
+  <g font-family="Menlo, monospace" font-size="34" fill="#e2e8f0">
+    <text x="120" y="70">4.2s → 1.9s</text>
+  </g>
+</svg>

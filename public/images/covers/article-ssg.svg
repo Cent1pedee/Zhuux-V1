@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="400" viewBox="0 0 1000 400" role="img" aria-label="静态生成与 SSR 对比示意图">
+  <rect width="1000" height="400" fill="#f8fafc"/>
+  <g fill="#ffffff" stroke="#cbd5e1" stroke-width="2">
+    <rect x="80" y="80" width="360" height="240" rx="12"/>
+    <rect x="560" y="80" width="360" height="240" rx="12" stroke="#1d4ed8" stroke-width="3"/>
+  </g>
+  <g font-family="Menlo, monospace" font-size="18" fill="#64748b">
+    <text x="112" y="122">SSR · 每次请求回源渲染</text>
+    <text x="592" y="122" fill="#1d4ed8">SSG · 构建时生成</text>
+  </g>
+  <g fill="none" stroke="#94a3b8" stroke-width="3" stroke-linecap="round">
+    <path d="M112 186h40M112 226h40M112 266h40"/>
+    <path d="M176 206h56l16-20 16 40 16-20h56"/>
+    <path d="M368 186h40M368 226h40M368 266h40"/>
+  </g>
+  <g fill="none" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round">
+    <path d="M592 186h40M592 226h40M592 266h40"/>
+    <path d="M656 206h56M712 206h52"/>
+    <path d="M848 186h40M848 226h40M848 266h40"/>
+  </g>
+  <g font-family="Menlo, monospace" font-size="16" fill="#0f172a">
+    <text x="112" y="300">TTFB 480ms</text>
+    <text x="592" y="300" fill="#1d4ed8">TTFB 60ms</text>
+  </g>
+</svg>

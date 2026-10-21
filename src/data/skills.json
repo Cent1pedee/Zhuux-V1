@@ -1,0 +1,17 @@
+{
+  "_comment": "⚠️ 示例假数据 · 按熟练度分组展示（不设「精通/熟练」虚假评级），可删除后替换",
+  "skills": [
+    {
+      "group": "语言",
+      "items": ["TypeScript", "JavaScript", "HTML", "CSS", "Go"]
+    },
+    {
+      "group": "框架与库",
+      "items": ["React", "Next.js", "Vue", "Tailwind CSS", "Node.js"]
+    },
+    {
+      "group": "工具与工程化",
+      "items": ["Vite", "Webpack", "Playwright", "GitHub Actions", "Figma"]
+    }
+  ]
+}

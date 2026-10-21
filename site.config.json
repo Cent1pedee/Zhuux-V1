@@ -1,0 +1,106 @@
+{
+    "url": "https://example.com",
+    "title": "煮雪话河山 · 前端工程师",
+    "description": "煮雪话河山，前端工程师，专注前端性能优化与设计系统。查看项目、技术文章与联系方式。",
+    "defaultTheme": "system",
+    "author": {
+        "name": "煮雪话河山",
+        "jobTitle": "前端工程师",
+        "directionTags": ["前端工程化", "性能优化", "设计系统"],
+        "tagline": "专注前端性能与设计系统，正在把团队构建耗时从 6 分钟压到 90 秒。",
+        "typewriterText": "专注前端性能与设计系统，正在把团队构建耗时从 6 分钟压到 90 秒。",
+        "bio": "前端工程师，7 年经验，长期关注首屏性能与可访问性。维护过日均 300 万 PV 的电商前端，主导过组件库与构建体系重构；业余写一些关于渲染性能和工具链的文章。",
+        "avatar": {
+            "src": "/images/avatar.svg",
+            "width": 96,
+            "height": 96,
+            "alt": "煮雪话河山"
+        }
+    },
+    "location": {
+        "city": "杭州",
+        "timezone": "UTC+8（北京时间）",
+        "contactWindow": "工作日上午 10:00–12:00、下午 14:00–18:00",
+        "hideExactAddress": true,
+        "exactAddress": "浙江省杭州市西湖区（仅按需提供）"
+    },
+    "contact": {
+        "email": "hello@example.com",
+        "emailCopyLabel": "已复制",
+        "emailHref": "mailto:hello@example.com"
+    },
+    "socials": [
+        {
+            "kind": "github",
+            "label": "GitHub",
+            "href": "https://github.com/example",
+            "event": "social_click"
+        },
+        {
+            "kind": "juejin",
+            "label": "掘金",
+            "href": "https://juejin.cn/user/0000000000000000",
+            "event": "social_click"
+        },
+        {
+            "kind": "zhihu",
+            "label": "知乎",
+            "href": "https://www.zhihu.com/people/example",
+            "event": "social_click"
+        },
+        {
+            "kind": "x",
+            "label": "X (Twitter)",
+            "href": "https://x.com/example",
+            "event": "social_click"
+        },
+        {
+            "kind": "linkedin",
+            "label": "LinkedIn",
+            "href": "https://www.linkedin.com/in/example",
+            "event": "social_click"
+        },
+        {
+            "kind": "email",
+            "label": "邮箱",
+            "href": "mailto:hello@example.com",
+            "event": "contact_click"
+        }
+    ],
+    "analytics": {
+        "endpoint": "",
+        "enabled": false
+    },
+    "giscus": {
+        "repo": "",
+        "repoId": "",
+        "category": "General",
+        "categoryId": "",
+        "mapping": "pathname",
+        "themeLight": "light",
+        "themeDark": "dark"
+    },
+    "rss": {
+        "title": "煮雪话河山 · 技术文章",
+        "description": "关于前端性能、构建工具链与可访问性的文章。"
+    },
+    "thirdPartyServices": [
+        {
+            "name": "Giscus（GitHub Discussions）",
+            "purpose": "文章留言。访客使用 GitHub 账号登录后发表评论，评论内容存储于 GitHub Discussions。",
+            "data": "GitHub 账号公开信息、评论内容；登录状态由 GitHub 提供。",
+            "loading": "仅在访客点击「加载评论区」或滚动到评论区时加载脚本；未登录时显示空态引导。",
+            "consentRequired": false
+        },
+        {
+            "name": "隐私友好的访问统计（自定义埋点）",
+            "purpose": "统计页面浏览、项目链接点击、简历下载、社交链接点击、联系入口点击等事件。",
+            "data": "事件名、页面路径；不采集个人身份信息，不做跨站追踪。",
+            "loading": "事件在交互发生时记录到 sessionStorage；未获得同意前不会发送任何请求。",
+            "consentRequired": true
+        }
+    ],
+    "backdrop": {
+        "wallpaper": ""
+    }
+}
