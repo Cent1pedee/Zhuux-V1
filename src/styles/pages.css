@@ -689,7 +689,92 @@ html:not([data-js="on"]) .xp-timeline::before {
 /* 技能分组 */
 .skill-groups {
   display: grid;
-  gap: 20px;
+  gap: 18px;
+}
+
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* 技术标签：实色浅底 + 深色文字 + 计数徽标，hover 变主色并轻微上浮 */
+.skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 6px 8px 6px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: color-mix(in oklab, var(--color-base-300) 40%, var(--color-base-100));
+  color: var(--color-base-content);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-micro) var(--ease-out),
+    background-color var(--dur-micro) var(--ease-out),
+    color var(--dur-micro) var(--ease-out),
+    box-shadow var(--dur-micro) var(--ease-out);
+}
+
+a.skill-chip:hover {
+  transform: translateY(-2px);
+  color: var(--color-primary);
+  border-color: var(--primary-line);
+  background: color-mix(in oklab, var(--color-primary) 8%, var(--color-base-100));
+  box-shadow: 0 6px 14px -10px color-mix(in oklab, var(--color-primary) 70%, transparent);
+}
+
+.skill-chip.is-static {
+  padding-right: 12px;
+  color: var(--text-muted);
+  background: color-mix(in oklab, var(--color-base-300) 24%, var(--color-base-100));
+}
+
+.skill-chip-name {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.skill-chip-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding-inline: 5px;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--color-primary) 12%, var(--color-base-100));
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.skill-hint {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .skill-chip {
+  background: rgb(255 255 255 / 0.06);
+  border-color: rgb(255 255 255 / 0.16);
+}
+
+[data-theme="dark"] .skill-chip-count {
+  background: color-mix(in oklab, var(--color-primary) 24%, transparent);
+}
+
+@media (pointer: coarse) {
+  a.skill-chip {
+    min-height: 44px;
+  }
 }
 
 .skill-group-title {
@@ -1540,5 +1625,334 @@ html[data-motion="reduced"] .section-kicker.justify-center {
 @media (prefers-reduced-motion: reduce) {
   .reading-progress-fill {
     transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   详情页底部：相关项目卡片 / 翻页卡片
+   -------------------------------------------------------------------------- */
+.related-block {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.related-block-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.related-block-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.related-block-more:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.related-project-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.related-project {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border-soft);
+  background: color-mix(in oklab, var(--color-base-200) 55%, var(--color-base-100));
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color var(--dur-micro) var(--ease-out),
+    background-color var(--dur-micro) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.related-project:hover {
+  border-color: var(--primary-line);
+  background: color-mix(in oklab, var(--color-primary) 5%, var(--color-base-100));
+  transform: translateX(3px);
+}
+
+.related-project-thumb {
+  flex: none;
+  width: 112px;
+  aspect-ratio: 5 / 2;
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--color-base-200);
+  border: 1px solid var(--border-soft);
+}
+
+.related-project-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 600ms var(--ease-out);
+}
+
+.related-project:hover .related-project-thumb img {
+  transform: scale(1.06);
+}
+
+.related-project-body {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.related-project-meta {
+  display: flex;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.related-project-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--color-base-content);
+}
+
+.related-project:hover .related-project-title {
+  color: var(--color-primary);
+}
+
+.related-project-summary {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.related-project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.related-project-tags .chip {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.related-project-arrow {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  color: var(--text-muted);
+  background: var(--color-base-100);
+  border: 1px solid var(--border-soft);
+  transition:
+    color var(--dur-micro) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-micro) var(--ease-out);
+}
+
+.related-project:hover .related-project-arrow {
+  color: var(--color-primary);
+  border-color: var(--primary-line);
+  transform: translateX(3px);
+}
+
+@media (max-width: 560px) {
+  .related-project {
+    flex-wrap: wrap;
+  }
+
+  .related-project-thumb {
+    width: 100%;
+    aspect-ratio: 5 / 2;
+  }
+
+  .related-project-arrow {
+    display: none;
+  }
+}
+
+/* 翻页：左右两张卡片 */
+.pager {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border-soft);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pager.pager-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* 单侧翻页：满宽卡片保持左对齐（不沿用「更早」的右对齐） */
+.pager-single .pager-card.pager-next {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.pager-single .pager-card.pager-next .pager-dir {
+  justify-content: flex-start;
+  align-self: flex-start;
+}
+
+.pager-single .pager-next .pager-dir,
+.pager-single .pager-next .pager-text,
+.pager-single .pager-next .pager-text > * {
+  justify-self: start;
+  justify-items: start;
+  text-align: left;
+  width: auto;
+}
+
+.pager-single .pager-next .pager-card-body {
+  flex-direction: row;
+}
+
+.pager-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border-soft);
+  background: color-mix(in oklab, var(--color-base-200) 55%, var(--color-base-100));
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+  transition:
+    border-color var(--dur-micro) var(--ease-out),
+    background-color var(--dur-micro) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.pager-card:hover {
+  border-color: var(--primary-line);
+  background: color-mix(in oklab, var(--color-primary) 5%, var(--color-base-100));
+  transform: translateY(-2px);
+}
+
+.pager-next {
+  text-align: right;
+}
+
+/* 「更早」卡片整体右对齐：尾行、正文、箭头都靠右 */
+.pager-next .pager-card-body {
+  flex-direction: row-reverse;
+}
+
+.pager-next .pager-text {
+  justify-items: end;
+  text-align: right;
+}
+
+.pager-next .pager-title {
+  display: block;
+}
+
+.pager-dir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.pager-next .pager-dir {
+  justify-content: flex-end;
+}
+
+.pager-card-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pager-thumb {
+  flex: none;
+  width: 84px;
+  aspect-ratio: 5 / 2;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-base-200);
+  border: 1px solid var(--border-soft);
+}
+
+.pager-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pager-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pager-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--color-base-content);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pager-card:hover .pager-title {
+  color: var(--color-primary);
+}
+
+.pager-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .pager {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pager-next {
+    text-align: left;
+  }
+
+  .pager-next .pager-card-body {
+    flex-direction: row;
+  }
+
+  .pager-next .pager-dir {
+    justify-content: flex-start;
   }
 }

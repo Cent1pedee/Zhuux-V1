@@ -143,9 +143,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  width: min(340px, calc(100vw - 148px));
+  width: 0;
   height: 44px;
-  padding-inline: 14px 6px;
+  padding-inline: 0;
+  overflow: hidden;
+  white-space: nowrap;
   border-radius: 9999px;
   border: 1px solid var(--glass-border);
   background: var(--glass-bg-strong);
@@ -155,23 +157,25 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(-50%) scaleX(0.55);
-  transform-origin: right center;
+  transform: translateY(-50%);
   transition:
-    opacity 180ms var(--ease-out),
-    transform 320ms var(--ease-spring),
-    visibility 0s linear 320ms,
+    width 340ms var(--ease-sheet),
+    padding 340ms var(--ease-sheet),
+    opacity 160ms var(--ease-out),
+    visibility 0s linear 340ms,
     border-color var(--dur-micro) var(--ease-out);
 }
 
 .header-search.is-open .header-search-capsule {
+  width: min(340px, calc(100vw - 148px));
+  padding-inline: 14px 6px;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translateY(-50%) scaleX(1);
   transition:
-    opacity 160ms var(--ease-out),
-    transform 320ms var(--ease-spring),
+    width 340ms var(--ease-sheet),
+    padding 340ms var(--ease-sheet),
+    opacity 200ms var(--ease-out) 80ms,
     visibility 0s linear 0s,
     border-color var(--dur-micro) var(--ease-out);
 }
@@ -312,7 +316,7 @@
 }
 
 @media (max-width: 767px) {
-  .header-search-capsule,
+  .header-search.is-open .header-search-capsule,
   .header-search-results {
     width: calc(100vw - 132px);
   }
@@ -535,11 +539,17 @@
   transition: transform 1200ms var(--ease-out);
 }
 
+/*
+ * 封面遮罩：底部加深保证白色标题可读；浅色封面（如 lumen-ui）额外叠一层中性暗色，
+ * 避免整张卡发白、文字与背景对比不足。
+ */
 .feature-cover::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgb(2 6 23 / 0.1) 0%, rgb(2 6 23 / 0.28) 34%, rgb(2 6 23 / 0.9) 100%);
+  background:
+    linear-gradient(180deg, rgb(2 6 23 / 0.16) 0%, rgb(2 6 23 / 0.34) 38%, rgb(2 6 23 / 0.9) 100%),
+    linear-gradient(0deg, rgb(2 6 23 / 0.22), rgb(2 6 23 / 0.22));
 }
 
 .feature-card:hover .feature-cover img {
@@ -602,6 +612,7 @@
 
 .feature-desc {
   font-size: 14px;
+  text-shadow: 0 1px 10px rgb(2 6 23 / 0.55);
   line-height: 1.6;
   color: rgb(241 245 249 / 0.92);
   display: -webkit-box;

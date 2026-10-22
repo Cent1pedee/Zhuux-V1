@@ -249,8 +249,8 @@
   border: 1px solid var(--primary-line);
   transform: translateY(-50%);
   transition:
-    transform var(--dur-page) var(--ease-spring),
-    width var(--dur-page) var(--ease-spring),
+    transform 300ms var(--ease-sheet),
+    width 300ms var(--ease-sheet),
     opacity var(--dur-fast) var(--ease-out);
   pointer-events: none;
   opacity: 0;
@@ -452,13 +452,17 @@ html:not([data-js="on"]) .nav-link[aria-current="page"] {
   line-height: 1;
   padding: 6px 10px;
   border-radius: var(--radius-pill);
-  background: var(--glass-bg-subtle);
-  color: color-mix(in oklab, var(--color-base-content) 88%, transparent);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* 实色浅灰底 + 实色文字：玻璃半透明叠在白色卡片上会显得「白字看不清」 */
+  background: color-mix(in oklab, var(--color-base-300) 45%, var(--color-base-100));
+  color: var(--color-base-content);
+  border: 1px solid var(--border-strong);
   white-space: nowrap;
   text-decoration: none;
+}
+
+[data-theme="dark"] .chip {
+  background: rgb(255 255 255 / 0.07);
+  border-color: rgb(255 255 255 / 0.16);
 }
 
 button.chip,

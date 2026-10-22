@@ -14,7 +14,8 @@ import { AuthorCard } from "@/components/AuthorCard";
 import { BackToTop } from "@/components/actions";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ReadingProgress } from "@/components/ReadingProgress";
-import { PagerShell, PagerLink } from "@/components/PagerTransition";
+import { PagerShell, ArticlePager } from "@/components/PagerTransition";
+import { RelatedProjects } from "@/components/RelatedProjects";
 
 export const dynamicParams = false;
 
@@ -116,42 +117,16 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             </div>
 
             <footer className="related-section">
-              {relatedProjects.length > 0 ? (
-                <div className="mb-6">
-                  <h2 className="text-base">相关项目</h2>
-                  <ul className="mt-2 space-y-2 text-sm">
-                    {relatedProjects.map((project) => (
-                      <li key={project.slug}>
-                        <Link href={`/projects/${project.slug}/`} className="inline-link">
-                          项目：{project.title}
-                        </Link>
-                        <span className="subtle"> —— {project.summary}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+              <RelatedProjects projects={relatedProjects} />
 
-              <nav aria-label="文章翻页" className="flex flex-col gap-3 text-sm sm:flex-row sm:justify-between">
-                {newer ? (
-                  <PagerLink href={`/articles/${newer.slug}/`} direction="prev">
-                    <span className="pager-arrow" data-dir="prev" aria-hidden="true">
-                      ←
-                    </span>
-                    更新的文章：{newer.title}
-                  </PagerLink>
-                ) : (
-                  <span />
-                )}
-                {older ? (
-                  <PagerLink href={`/articles/${older.slug}/`} direction="next" className="inline-link sm:text-right">
-                    更早的文章：{older.title}
-                    <span className="pager-arrow" data-dir="next" aria-hidden="true">
-                      →
-                    </span>
-                  </PagerLink>
-                ) : null}
-              </nav>
+              <ArticlePager
+                label="文章翻页"
+                prev={newer ? { href: `/articles/${newer.slug}/`, title: newer.title, meta: newer.date, cover: newer.cover } : null}
+                next={older ? { href: `/articles/${older.slug}/`, title: older.title, meta: older.date, cover: older.cover } : null}
+                prevLabel="更新的文章"
+                nextLabel="更早的文章"
+              />
+
               <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-4">
                   <Link href="/articles/" className="btn-outline-primary btn-sm">

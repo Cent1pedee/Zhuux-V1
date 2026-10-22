@@ -11,7 +11,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { AuthorCard } from "@/components/AuthorCard";
 import { BackToTop } from "@/components/actions";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
-import { PagerShell, PagerLink } from "@/components/PagerTransition";
+import { PagerShell, ArticlePager } from "@/components/PagerTransition";
 
 export const dynamicParams = false;
 
@@ -109,26 +109,13 @@ export default async function ChatterPage({ params }: { params: Promise<{ slug: 
             </div>
 
             <footer className="mt-10 border-t pt-5" style={{ borderColor: "var(--border-soft)" }}>
-              <nav aria-label="杂谈翻页" className="flex flex-col gap-3 text-sm sm:flex-row sm:justify-between">
-                {newer ? (
-                  <PagerLink href={`/chatters/${newer.slug}/`} direction="prev">
-                    <span className="pager-arrow" data-dir="prev" aria-hidden="true">
-                      ←
-                    </span>
-                    更新的一则：{newer.title}
-                  </PagerLink>
-                ) : (
-                  <span />
-                )}
-                {older ? (
-                  <PagerLink href={`/chatters/${older.slug}/`} direction="next" className="inline-link sm:text-right">
-                    更早的一则：{older.title}
-                    <span className="pager-arrow" data-dir="next" aria-hidden="true">
-                      →
-                    </span>
-                  </PagerLink>
-                ) : null}
-              </nav>
+              <ArticlePager
+                label="杂谈翻页"
+                prev={newer ? { href: `/chatters/${newer.slug}/`, title: newer.title, meta: newer.date } : null}
+                next={older ? { href: `/chatters/${older.slug}/`, title: older.title, meta: older.date } : null}
+                prevLabel="更新的一则"
+                nextLabel="更早的一则"
+              />
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                 <Link href="/chatters/" className="btn-outline-primary btn-sm">
                   全部杂谈

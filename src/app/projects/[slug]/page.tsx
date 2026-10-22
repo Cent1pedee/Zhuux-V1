@@ -14,7 +14,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { AuthorCard } from "@/components/AuthorCard";
 import { BackToTop } from "@/components/actions";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
-import { PagerShell, PagerLink } from "@/components/PagerTransition";
+import { PagerShell, ArticlePager } from "@/components/PagerTransition";
 
 export const dynamicParams = false;
 
@@ -201,55 +201,64 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             相关内容
           </h2>
           {relatedArticles.length > 0 ? (
-            <div className="mt-4">
-              <h3 className="text-sm font-semibold">写过的文章</h3>
-              <ul className="mt-2 space-y-2 text-sm">
+            <div className="related-block" style={{ marginTop: 20, borderTop: 0, paddingTop: 0 }}>
+              <h3 className="related-block-head text-base" style={{ marginBottom: 12 }}>
+                写过的文章
+              </h3>
+              <ul className="related-project-list">
                 {relatedArticles.map((article) => (
-                  <li key={article.slug} className="flex flex-wrap items-center gap-2">
-                    <Link href={`/articles/${article.slug}/`} className="inline-link">
-                      文章：《{article.title}》
+                  <li key={article.slug}>
+                    <Link href={`/articles/${article.slug}/`} className="related-project">
+                      <span className="related-project-thumb">
+                        <img src={article.cover} alt={article.coverAlt} width={1000} height={400} loading="lazy" decoding="async" />
+                      </span>
+                      <span className="related-project-body">
+                        <span className="related-project-meta">
+                          <time dateTime={article.date}>{article.date}</time>
+                          <span aria-hidden="true">·</span>
+                          <span>文章</span>
+                        </span>
+                        <span className="related-project-title">{article.title}</span>
+                        <span className="related-project-summary">{article.summary}</span>
+                        <span className="related-project-tags">
+                          {article.tags.slice(0, 3).map((tag) => (
+                            <span key={tag} className="chip">
+                              {tag}
+                            </span>
+                          ))}
+                        </span>
+                      </span>
+                      <span className="related-project-arrow" aria-hidden="true">
+                        →
+                      </span>
                     </Link>
-                    <time dateTime={article.date} className="text-xs subtle">
-                      {article.date}
-                    </time>
                   </li>
                 ))}
               </ul>
             </div>
           ) : null}
-          <div className="mt-4">
-            <h3 className="text-sm font-semibold">这个项目用到的技术栈</h3>
-            <p className="mt-1 text-xs subtle">点击标签可查看使用相同技术栈的其他项目。</p>
-            <ul className="mt-2 flex flex-wrap gap-2">
+          <div className="related-block" style={{ marginTop: 24 }}>
+            <h3 className="related-block-head text-base" style={{ marginBottom: 10 }}>
+              用到的技术栈
+            </h3>
+            <ul className="flex flex-wrap gap-2" aria-label="按技术栈筛选项目">
               {skillLinks.map((skill) => (
                 <li key={skill}>
-                  <Link href={`/projects/?tags=${encodeURIComponent(skill)}`} className="chip" aria-label={`按技术栈 ${skill} 筛选项目`}>
-                    {skill}
+                  <Link href={`/projects/?tags=${encodeURIComponent(skill)}`} className="skill-chip" aria-label={`按技术栈 ${skill} 筛选项目`}>
+                    <span className="skill-chip-name">{skill}</span>
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
-          <nav aria-label="项目翻页" className="mt-8 flex flex-col gap-3 border-t pt-5 text-sm sm:flex-row sm:justify-between" style={{ borderColor: "var(--border-soft)" }}>
-            {newerProject ? (
-              <PagerLink href={`/projects/${newerProject.slug}/`} direction="prev">
-                <span className="pager-arrow" data-dir="prev" aria-hidden="true">
-                  ←
-                </span>
-                更新的项目：{newerProject.title}
-              </PagerLink>
-            ) : (
-              <span />
-            )}
-            {olderProject ? (
-              <PagerLink href={`/projects/${olderProject.slug}/`} direction="next" className="inline-link sm:text-right">
-                更早的项目：{olderProject.title}
-                <span className="pager-arrow" data-dir="next" aria-hidden="true">
-                  →
-                </span>
-              </PagerLink>
-            ) : null}
-          </nav>
+
+          <ArticlePager
+            label="项目翻页"
+            prev={newerProject ? { href: `/projects/${newerProject.slug}/`, title: newerProject.title, meta: newerProject.date, cover: newerProject.cover } : null}
+            next={olderProject ? { href: `/projects/${olderProject.slug}/`, title: olderProject.title, meta: olderProject.date, cover: olderProject.cover } : null}
+            prevLabel="更新的项目"
+            nextLabel="更早的项目"
+          />
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
             <a href="/projects/" className="btn-outline-primary btn-sm">
               ← 返回项目列表
