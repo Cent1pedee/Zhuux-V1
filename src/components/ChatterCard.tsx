@@ -7,14 +7,13 @@ import { ArrowRightIcon } from "./icons";
 export function ChatterCard({ chatter, excerpt }: { chatter: Chatter; excerpt: string }) {
   return (
     <article className="card-surface chatter-card" data-interactive="true">
-      <Link href={`/chatters/${chatter.slug}/`} className="chatter-card-link" style={{ color: "inherit", textDecoration: "none" }}>
-        <p className="chatter-quote">
-          {chatter.title ? <strong className="block font-semibold">{chatter.title}</strong> : null}
-          {excerpt}
-        </p>
+      <Link href={`/chatters/${chatter.slug}/`} className="chatter-card-link">
+        {/* 标题与正文分成两个文本块：原先同字号同字体挤在一段里，扫描时找不到入口 */}
+        {chatter.title ? <h3 className="chatter-title">{chatter.title}</h3> : null}
+        <p className="chatter-excerpt">{excerpt}</p>
         <div className="chatter-foot">
           <time dateTime={chatter.date}>{formatDate(chatter.date)}</time>
-          <span className="flex items-center gap-2">
+          <span className="chatter-meta-end">
             {chatter.mood ? <span className="chip">{chatter.mood}</span> : null}
             <ArrowRightIcon width={14} height={14} />
           </span>

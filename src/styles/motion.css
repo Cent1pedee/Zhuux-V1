@@ -478,24 +478,9 @@ body {
   }
 }
 
-/* 翻页链接：hover 时箭头向对应方向移动 */
+/* 翻页链接：布局与箭头动效统一由 pages.css 的 .pager-card 负责，这里不再覆盖 display */
 .pager-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   transition: color var(--dur-micro) var(--ease-out);
-}
-
-.pager-link .pager-arrow {
-  transition: transform var(--dur-fast) var(--ease-out);
-}
-
-.pager-link:hover .pager-arrow[data-dir="next"] {
-  transform: translateX(4px);
-}
-
-.pager-link:hover .pager-arrow[data-dir="prev"] {
-  transform: translateX(-4px);
 }
 
 @media (prefers-reduced-motion: reduce) {

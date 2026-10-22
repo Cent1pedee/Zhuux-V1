@@ -1796,163 +1796,263 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   }
 }
 
-/* 翻页：左右两张卡片 */
+/* 翻页：左右两张卡片（发丝线分隔，不是描边方框） */
+/*
+ * 两栏各是一张独立圆角卡，中间留 12px 空隙；
+ * 以前用 1px 背景色"画"分隔线，会变成一条穿到卡片外围的十字线。
+ */
 .pager {
   display: grid;
   gap: 12px;
-  margin-top: 28px;
-  padding-top: 22px;
+  margin-top: 32px;
+  padding-top: 24px;
   border-top: 1px solid var(--border-soft);
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+/* 单侧翻页：一张卡铺满，不沿用「更早」的右对齐 */
 .pager.pager-single {
   grid-template-columns: minmax(0, 1fr);
 }
 
-/* 单侧翻页：满宽卡片保持左对齐（不沿用「更早」的右对齐） */
-.pager-single .pager-card.pager-next {
-  align-items: flex-start;
-  text-align: left;
-}
-
-.pager-single .pager-card.pager-next .pager-dir {
-  justify-content: flex-start;
-  align-self: flex-start;
-}
-
-.pager-single .pager-next .pager-dir,
-.pager-single .pager-next .pager-text,
-.pager-single .pager-next .pager-text > * {
-  justify-self: start;
-  justify-items: start;
-  text-align: left;
-  width: auto;
-}
-
-.pager-single .pager-next .pager-card-body {
-  flex-direction: row;
-}
-
 .pager-card {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px 16px;
-  border-radius: 14px;
-  border: 1px solid var(--border-soft);
-  background: color-mix(in oklab, var(--color-base-200) 55%, var(--color-base-100));
+  display: grid;
+  /* 两行：上排「方向标签 + 圆形箭头」，下排「缩略图 + 标题与日期」 */
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "dir arrow"
+    "thumb body";
+  align-items: start;
+  column-gap: 14px;
+  row-gap: 12px;
+  min-width: 0;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: color-mix(in oklab, var(--color-base-100) 72%, var(--color-base-200));
   color: inherit;
   text-decoration: none;
-  min-width: 0;
+  position: relative;
+  isolation: isolate;
   transition:
-    border-color var(--dur-micro) var(--ease-out),
-    background-color var(--dur-micro) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
+    background-color 180ms var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
-.pager-card:hover {
-  border-color: var(--primary-line);
-  background: color-mix(in oklab, var(--color-primary) 5%, var(--color-base-100));
-  transform: translateY(-2px);
+/* 主色内描边，hover 时淡入（inset shadow，不触发布局） */
+.pager-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1.5px var(--primary-line);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+  pointer-events: none;
 }
 
-.pager-next {
-  text-align: right;
+.pager-card:hover,
+.pager-card:focus-visible {
+  background: color-mix(in oklab, var(--color-primary) 6%, var(--color-base-100));
+  transform: translateY(-3px);
+  box-shadow: 0 16px 30px -22px rgb(15 23 42 / 0.55);
+  outline: none;
 }
 
-/* 「更早」卡片整体右对齐：尾行、正文、箭头都靠右 */
-.pager-next .pager-card-body {
-  flex-direction: row-reverse;
+.pager-card:hover::after,
+.pager-card:focus-visible::after {
+  opacity: 1;
 }
 
-.pager-next .pager-text {
-  justify-items: end;
-  text-align: right;
-}
-
-.pager-next .pager-title {
-  display: block;
-}
-
+/* 方向标签：12.5px 主色，字距随 hover 微微张开 */
 .pager-dir {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  grid-area: dir;
+  align-self: center;
+  font-size: 12.5px;
   font-weight: 600;
+  line-height: 28px;
+  letter-spacing: 0.02em;
   color: var(--color-primary);
+  transition: letter-spacing var(--dur-fast) var(--ease-sheet);
 }
 
-.pager-next .pager-dir {
-  justify-content: flex-end;
-}
-
-.pager-card-body {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
+/* 圆形箭头徽标：hover 时填充主色并沿方向滑动 */
+.pager-arrow {
+  grid-area: arrow;
+  justify-self: end;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  color: var(--text-muted);
+  background: color-mix(in oklab, var(--color-base-200) 80%, var(--color-base-100));
+  box-shadow: inset 0 0 0 1px var(--border-soft);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-spring);
 }
 
 .pager-thumb {
-  flex: none;
+  grid-area: thumb;
+  align-self: center;
   width: 84px;
+  max-width: 100%;
   aspect-ratio: 5 / 2;
   border-radius: 8px;
   overflow: hidden;
   background: var(--color-base-200);
-  border: 1px solid var(--border-soft);
+  box-shadow: inset 0 0 0 1px var(--border-soft);
 }
 
 .pager-thumb img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  transition: transform 560ms var(--ease-out);
 }
 
+/* 标题 + 日期整体成块，避免两段文字各自成行显得松散 */
 .pager-text {
+  grid-area: text;
   display: grid;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
 }
 
 .pager-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
   color: var(--color-base-content);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.pager-card:hover .pager-title {
-  color: var(--color-primary);
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .pager-meta {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 11.5px;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
   color: var(--text-muted);
 }
 
+/* 单栏满宽：多给一点呼吸，缩略图放大一档 */
+.pager-single .pager-card {
+  padding: 18px 20px;
+  column-gap: 16px;
+}
+
+.pager-single .pager-thumb {
+  width: 104px;
+}
+
+/*
+ * 「更早」：方向箭头贴左（与「更新的」箭头贴右互为镜像），缩略图靠右，文字统一左对齐。
+ * 网格模板与「更新的」完全一致，只交换元素在本单元内的水平对齐 ——
+ * 这样两栏的行内基线始终对齐；直接改写 grid-template-areas 会重置同名网格项，
+ * 让方向标签挤到缩略图那一列里竖排。
+ */
+.pager-next {
+  grid-template-areas:
+    "arrow dir"
+    "thumb text";
+}
+
+/* 镜像只在双栏时生效：单栏铺满时方向标签必须回到左侧 */
+.pager:not(.pager-single) .pager-next .pager-dir {
+  justify-self: end;
+}
+
+.pager:not(.pager-single) .pager-next .pager-arrow {
+  justify-self: start;
+}
+
+.pager-next .pager-thumb {
+  justify-self: end;
+}
+
+/* hover 动效 */
+.pager-card:hover .pager-dir,
+.pager-card:focus-visible .pager-dir {
+  letter-spacing: 0.06em;
+}
+
+.pager-card:hover .pager-title,
+.pager-card:focus-visible .pager-title {
+  color: var(--color-primary);
+}
+
+.pager-card:hover .pager-thumb img {
+  transform: scale(1.06);
+}
+
+.pager-card:hover .pager-arrow,
+.pager-card:focus-visible .pager-arrow {
+  color: #fff;
+  background: var(--color-primary);
+  box-shadow: inset 0 0 0 1px var(--color-primary), 0 6px 14px -8px var(--color-primary);
+}
+
+.pager-prev:hover .pager-arrow,
+.pager-prev:focus-visible .pager-arrow {
+  transform: translateX(-4px);
+}
+
+.pager-next:hover .pager-arrow,
+.pager-next:focus-visible .pager-arrow {
+  transform: translateX(4px);
+}
+
 @media (max-width: 640px) {
-  .pager {
-    grid-template-columns: minmax(0, 1fr);
+  .pager,
+  .pager.pager-single {
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .pager-next {
-    text-align: left;
+  .pager-card {
+    padding: 15px 16px;
+    column-gap: 12px;
   }
 
-  .pager-next .pager-card-body {
-    flex-direction: row;
+  .pager-title {
+    font-size: 15px;
   }
 
-  .pager-next .pager-dir {
-    justify-content: flex-start;
+  /*
+   * 两栏叠成单列后统一排版：标签在左上、箭头在右上、缩略图在左下、文字在右下。
+   * 模板只声明一次 —— grid-template-areas 会重置行列尺寸，在「更早」上再声明一次
+   * 会得到另一套列宽，文字列被挤成 0 宽。
+   */
+  .pager:not(.pager-single) .pager-card {
+    grid-template-areas:
+      "dir arrow"
+      "thumb text";
+  }
+
+  .pager:not(.pager-single) .pager-next .pager-dir {
+    justify-self: start;
+    text-align: start;
+  }
+
+  .pager:not(.pager-single) .pager-next .pager-arrow {
+    justify-self: end;
+  }
+
+  .pager:not(.pager-single) .pager-next .pager-thumb {
+    justify-self: start;
+  }
+
+  /* 缩略图收窄，把宽度让给标题（单栏 / 双栏都要覆盖到 .pager-single 的 104px） */
+  .pager .pager-thumb {
+    width: 72px;
   }
 }

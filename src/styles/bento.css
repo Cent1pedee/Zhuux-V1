@@ -1072,25 +1072,55 @@
   }
 }
 
+/* 杂谈卡片：链接铺满整卡，卡片变高（align）+ 内边距收缩（padding），内容始终贴底 */
 .chatter-card {
+  padding: 0;
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+}
+
+.chatter-card-link {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  flex: 1;
   padding: 20px;
   color: inherit;
   text-decoration: none;
 }
 
-.chatter-quote {
-  font-family: var(--font-serif);
-  font-size: 17px;
-  line-height: 1.7;
+/* 标题：无衬线、600、14px，明显重于正文，行高收紧 */
+.chatter-title {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
   color: var(--color-base-content);
   display: -webkit-box;
-  -webkit-line-clamp: 6;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 正文：降一级到 13px / 摘要色，和标题拉开字号与颜色的双重层级 */
+.chatter-excerpt {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
   white-space: pre-line;
+}
+
+.chatter-meta-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .chatter-foot {
@@ -1099,6 +1129,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  margin-top: auto;
   padding-top: 12px;
   border-top: 1px dashed var(--border-strong);
   font-size: 12px;

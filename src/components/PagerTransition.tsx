@@ -68,10 +68,47 @@ export interface PagerItem {
   cover?: string;
 }
 
+/** 单个翻页卡片：方向标签 + 箭头徽标 + 缩略图 + 标题 + 副标题 */
+function PagerCard({
+  item,
+  direction,
+  dirLabel,
+}: {
+  item: PagerItem;
+  direction: "prev" | "next";
+  dirLabel: string;
+}) {
+  const Arrow = direction === "prev" ? ArrowLeftIcon : ArrowRightIcon;
+
+  return (
+    <PagerLink
+      href={item.href}
+      direction={direction}
+      className={`pager-card pager-${direction}`}
+      ariaLabel={`${dirLabel}：${item.title}`}
+    >
+      <span className="pager-dir">{dirLabel}</span>
+      <span className="pager-arrow" aria-hidden="true">
+        <Arrow width={14} height={14} />
+      </span>
+      {item.cover ? (
+        <span className="pager-thumb" aria-hidden="true">
+          <img src={item.cover} alt="" loading="lazy" decoding="async" />
+        </span>
+      ) : null}
+      <span className="pager-text">
+        <span className="pager-title">{item.title}</span>
+        <span className="pager-meta">{item.meta}</span>
+      </span>
+    </PagerLink>
+  );
+}
+
 /**
  * 详情页底部翻页卡片：左右两栏，分别指向「更新 / 更早」的内容。
- * - 卡片整块可点，hover 时边框变主色、箭头位移、缩略图轻微放大
- * - 只有一侧内容时自动占满该侧，不留空洞
+ * - 信息层级：方向标签（小号主色）→ 标题（16px，最多两行）→ 日期（等宽小字）
+ * - hover / 键盘聚焦时整卡抬起、主色描边、箭头填充主色并沿方向滑动、缩略图轻推
+ * - 只有一侧内容时自动单栏铺满，不留空洞
  */
 export function ArticlePager({
   label,
@@ -90,44 +127,8 @@ export function ArticlePager({
 
   return (
     <nav aria-label={label} className={`pager${prev && next ? "" : " pager-single"}`}>
-      {prev ? (
-        <PagerLink href={prev.href} direction="prev" className="pager-card pager-prev" ariaLabel={`${prevLabel}：${prev.title}`}>
-          <span className="pager-dir">
-            <ArrowLeftIcon width={16} height={16} aria-hidden="true" />
-            {prevLabel}
-          </span>
-          <span className="pager-card-body">
-            <span className="pager-text">
-              <span className="pager-title">{prev.title}</span>
-              <span className="pager-meta">{prev.meta}</span>
-            </span>
-            {prev.cover ? (
-              <span className="pager-thumb" aria-hidden="true">
-                <img src={prev.cover} alt="" loading="lazy" decoding="async" />
-              </span>
-            ) : null}
-          </span>
-        </PagerLink>
-      ) : null}
-      {next ? (
-        <PagerLink href={next.href} direction="next" className="pager-card pager-next" ariaLabel={`${nextLabel}：${next.title}`}>
-          <span className="pager-dir">
-            {nextLabel}
-            <ArrowRightIcon width={16} height={16} aria-hidden="true" />
-          </span>
-          <span className="pager-card-body">
-            {next.cover ? (
-              <span className="pager-thumb" aria-hidden="true">
-                <img src={next.cover} alt="" loading="lazy" decoding="async" />
-              </span>
-            ) : null}
-            <span className="pager-text">
-              <span className="pager-title">{next.title}</span>
-              <span className="pager-meta">{next.meta}</span>
-            </span>
-          </span>
-        </PagerLink>
-      ) : null}
+      {prev ? <PagerCard item={prev} direction="prev" dirLabel={prevLabel} /> : null}
+      {next ? <PagerCard item={next} direction="next" dirLabel={nextLabel} /> : null}
     </nav>
   );
 }
