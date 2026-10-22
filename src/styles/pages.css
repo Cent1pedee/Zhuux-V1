@@ -1848,11 +1848,13 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   isolation: isolate;
   display: grid;
   grid-template-columns: var(--pager-media, 152px) minmax(0, 1fr);
+  /* 封面自成一列、跨满两行，行高由正文与方向行撑开，封面在格内垂直居中 */
   grid-template-areas:
     "media body"
     "media dir";
   align-content: center;
-  row-gap: 6px;
+  /* 行距用 em 交给子元素自己的字号：封面的视觉中心落在两行文字块的正中 */
+  row-gap: 0.62em;
   column-gap: 16px;
   min-width: 0;
   padding: 14px;
@@ -1966,6 +1968,9 @@ html[data-motion="reduced"] .section-kicker.justify-center {
    -------------------------------------------------------------------------- */
 .pager-media {
   grid-area: media;
+  /* 封面自成一列、跨满两行，再垂直居中 —— 之前 body 顶着方向行留白，
+     会让封面在格子里看起来整体偏上 */
+  align-self: center;
   position: relative;
   display: block;
   width: 100%;
@@ -2030,14 +2035,18 @@ html[data-motion="reduced"] .section-kicker.justify-center {
 }
 
 /* --------------------------------------------------------------------------
-   正文：类型微标签 / 标题 / 日期 + 方向
+   正文：类型微标签 / 标题 / 日期行
+   排版节奏（左侧卡，镜像侧整体对称）：
+     · 标签与标题左对齐到同一条线
+     · 日期行贴着封面底边——两条基线和封面上下边缘对齐，视觉才算“稳”
+     · 日期用等宽数字 + 大写字距，和正文的衬线/无衬线区分开，像一行元数据
    -------------------------------------------------------------------------- */
 .pager-body {
   grid-area: body;
   position: relative;
   display: grid;
-  gap: 5px;
-  align-self: end;
+  gap: 8px;
+  align-self: center;
   min-width: 0;
 }
 
@@ -2046,24 +2055,24 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 7px 2px 6px;
+  padding: 2px 8px 2px 7px;
   border-radius: 9999px;
-  background: color-mix(in oklab, var(--color-primary) 10%, transparent);
-  color: color-mix(in oklab, var(--color-primary) 86%, var(--color-base-content));
+  background: color-mix(in oklab, var(--color-primary) 9%, transparent);
+  color: color-mix(in oklab, var(--color-primary) 90%, var(--color-base-content));
   font-size: 10.5px;
   font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0.02em;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
   white-space: nowrap;
 }
 
 .pager-tag::before {
   content: "";
-  width: 5px;
-  height: 5px;
+  width: 4.5px;
+  height: 4.5px;
   border-radius: 9999px;
   background: currentColor;
-  opacity: 0.75;
+  opacity: 0.8;
 }
 
 .pager-title {
@@ -2071,24 +2080,27 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  /* 标题行高略紧、上缘对齐字形框，是为了让两行标题的块高刚好等于封面的视觉高 */
   font-size: 15.5px;
   font-weight: 600;
-  line-height: 1.42;
-  letter-spacing: -0.01em;
+  line-height: 1.4;
+  letter-spacing: -0.012em;
   color: var(--color-base-content);
   transition: color var(--pager-dur) var(--pager-ease);
 }
 
-/* 日期行：等宽数字 + 一条短线，把「数据感」和方向线索放在同一行 */
+/* 日期行：等宽数字 + 一条短线；短线 hover 时向右长出去 */
 .pager-meta {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   min-width: 0;
+  padding-bottom: 1px;
   font-family: var(--font-mono);
   font-size: 11.5px;
-  line-height: 1.5;
-  letter-spacing: 0.04em;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
   transition: color var(--pager-dur) var(--pager-ease);
 }
@@ -2096,10 +2108,10 @@ html[data-motion="reduced"] .section-kicker.justify-center {
 .pager-meta::before {
   content: "";
   flex: none;
-  width: 14px;
+  width: 16px;
   height: 1px;
   background: currentColor;
-  opacity: 0.45;
+  opacity: 0.4;
   transition:
     width var(--pager-dur) var(--pager-ease),
     opacity var(--pager-dur) var(--ease-out),
@@ -2111,7 +2123,7 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   display: inline-grid;
   place-items: center;
   width: 0;
-  margin-left: -3px;
+  margin-left: -4px;
   color: var(--color-primary);
   opacity: 0;
   overflow: hidden;
@@ -2126,7 +2138,7 @@ html[data-motion="reduced"] .section-kicker.justify-center {
 
 .pager-card:hover .pager-meta::before,
 .pager-card:focus-visible .pager-meta::before {
-  width: 22px;
+  width: 23px;
   opacity: 0.9;
   background: var(--color-primary);
 }
