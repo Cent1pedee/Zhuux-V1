@@ -478,10 +478,11 @@ body {
   }
 }
 
-/* 翻页链接：布局与箭头动效统一由 pages.css 的 .pager-card 负责，这里不再覆盖 display */
-.pager-link {
-  transition: color var(--dur-micro) var(--ease-out);
-}
+/*
+ * 翻页链接不再单独声明 transition —— 它和 .pager-card 是同一个元素，两边都写
+ * transition 简写时后加载的这份会整份覆盖 pages.css 的描边 / 阴影 / 位移过渡，
+ * 结果 hover 时边框「啪」地直接跳到位。动效全部由 pages.css 负责。
+ */
 
 @media (prefers-reduced-motion: reduce) {
   .filter-count,

@@ -254,8 +254,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
           <ArticlePager
             label="项目翻页"
-            prev={newerProject ? { href: `/projects/${newerProject.slug}/`, title: newerProject.title, meta: newerProject.date, cover: newerProject.cover } : null}
-            next={olderProject ? { href: `/projects/${olderProject.slug}/`, title: olderProject.title, meta: olderProject.date, cover: olderProject.cover } : null}
+            prev={newerProject ? { href: `/projects/${newerProject.slug}/`, title: newerProject.title, meta: newerProject.date, cover: newerProject.cover, tag: PROJECT_KIND_LABEL[newerProject.kinds[0]] } : null}
+            next={olderProject ? { href: `/projects/${olderProject.slug}/`, title: olderProject.title, meta: olderProject.date, cover: olderProject.cover, tag: PROJECT_KIND_LABEL[olderProject.kinds[0]] } : null}
             prevLabel="更新的项目"
             nextLabel="更早的项目"
           />

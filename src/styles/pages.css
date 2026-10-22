@@ -1799,19 +1799,27 @@ html[data-motion="reduced"] .section-kicker.justify-center {
 }
 
 /* --------------------------------------------------------------------------
-   翻页卡片：两张镜像的横版卡，以中缝为轴互为中心对称
-   每张卡内部是同一套「媒体 → 正文 → 方向」横排：
-   - 「更新的」：媒体贴中缝、方向贴外侧
-   - 「更早」：镜像过来，媒体同样贴中缝，于是两卡共用一条媒体带叠在中缝上
-   单栏满宽时媒体统一回到左侧（不镜像），避免整行只有一小块图。
+   翻页卡片 —— 一个「继续阅读」的翻页器，而不是两张信息卡
+   ┌─────────────────────┐ ┌─────────────────────┐
+   │[封面]  标题          │ │   标题        [封面]│
+   │        — 日期   ↖ 更早│ │ 更早 ↗ 日期 —       │
+   └─────────────────────┘ └─────────────────────┘
+   视觉目标：把注意力交给封面和标题，方向信息收进日期行做点缀。
+   这带来三个连锁约束，同时也是这组样式的主线：
+   ① 封面绝不裁切 —— 封面是内容，不是装饰，任何一行字被切掉都是坏的。
+      所以封面框只有一个尺寸（占卡片 38% 宽、5:2），原图 contain 铺满；
+      封面比例不同时左右补一条「同色系」留白，看起来像一张完整横图。
+   ② 方向要和卡片同时到达 —— 边框、底色、阴影、位移全部落在同一组
+      duration / easing 上，任何一项慢半拍都会给人「跳一下」的错觉。
+   ③ 要经得起慢放 —— 光斑、扫光、箭头、封面这几条动效分别延迟 0/60/90/120ms，
+      形成一次轻微的「涟漪」，而不是四件事同时开始。
    -------------------------------------------------------------------------- */
-/*
- * 两卡并排靠容器查询驱动（见文件末尾），默认按两栏声明；
- * minmax(0, ...) 必须显式写，auto 会被「媒体 + 方向 + 不换行标题」撑爆。
- */
+
 .pager {
   display: grid;
   gap: 12px;
+  /* 两卡并排靠容器查询驱动（见文件末尾），默认按两栏声明；
+     minmax(0, …) 必须显式写，auto 会被「封面 + 方向 + 不换行标题」撑爆 */
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 32px;
   padding-top: 24px;
@@ -1823,49 +1831,114 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   grid-template-columns: minmax(0, 1fr);
 }
 
-/*
- * 每张卡一行三段：媒体 → 正文 → 方向。
- * 头两段用 minmax 吃掉宽度，媒体列固定 148px，所有卡片的封面尺寸完全一致。
- */
+/* --------------------------------------------------------------------------
+   卡片本体
+   描边用三个独立图层，而不是 border —— border-color 过渡时会和阴影抢帧，
+   而且 1px 与 1.6px 的切换会挤动 1px 内容：
+   ① ::before —— 常驻发丝描边（常态边界）
+   ② ::after  —— 主色描边，hover 时淡入
+   ③ 卡片内 ::before？不行（已被占用）→ 用一个伪元素层画主色光斑
+   -------------------------------------------------------------------------- */
 .pager-card {
-  display: grid;
-  grid-template-columns: 148px minmax(0, 1fr) auto;
-  grid-template-areas: "media body dir";
-  align-items: center;
-  column-gap: 16px;
-  min-width: 0;
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: color-mix(in oklab, var(--color-base-100) 72%, var(--color-base-200));
-  color: inherit;
-  text-decoration: none;
+  --pager-dur: 280ms;
+  --pager-ease: var(--ease-out);
+  /* 封面列宽由卡片自身计算，单侧满宽时也不会被拉成一条巨幅横图 */
+  --pager-media: 38%;
   position: relative;
   isolation: isolate;
+  display: grid;
+  grid-template-columns: var(--pager-media, 152px) minmax(0, 1fr);
+  grid-template-areas:
+    "media body"
+    "media dir";
+  align-content: center;
+  row-gap: 6px;
+  column-gap: 16px;
+  min-width: 0;
+  padding: 14px;
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--color-base-100) 70%, var(--color-base-200));
+  color: inherit;
+  text-decoration: none;
   overflow: hidden;
   transition:
-    background-color 180ms var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
+    background-color var(--pager-dur) var(--ease-in-out),
+    box-shadow var(--pager-dur) var(--pager-ease),
+    transform var(--pager-dur) var(--pager-ease);
 }
 
-/* 主色内描边，hover 时淡入（inset shadow，不触发布局） */
+/* ① 常驻发丝描边 */
+.pager-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--border-soft);
+  transition: box-shadow var(--pager-dur) var(--pager-ease);
+  pointer-events: none;
+}
+
+/* ② 主色描边，和底色同时到达 */
 .pager-card::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 2;
   border-radius: inherit;
-  box-shadow: inset 0 0 0 1.5px var(--primary-line);
+  /* 暗色下 --primary-line 偏亮，压一点不刺眼；两条描边一起淡入，不会「闪」一下 */
+  box-shadow: inset 0 0 0 1.6px color-mix(in oklab, var(--primary-line) 82%, transparent);
   opacity: 0;
-  transition: opacity var(--dur-fast) var(--ease-out);
+  transition: opacity var(--pager-dur) var(--ease-in-out);
   pointer-events: none;
+}
+
+/* ③ 光标扫过时从反方向亮起一片柔光，把视线带到封面 */
+.pager-body::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: 180px;
+  height: 180px;
+  border-radius: 9999px;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--color-primary) 14%, transparent),
+    transparent
+  );
+  opacity: 0;
+  transform: scale(0.7);
+  transition:
+    opacity var(--pager-dur) var(--pager-ease),
+    transform 520ms var(--pager-ease);
+  transition-delay: 40ms;
+  pointer-events: none;
+}
+
+.pager-prev .pager-body::before {
+  left: -70px;
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.pager-next .pager-body::before {
+  right: -70px;
+  top: 50%;
+  translate: 0 -50%;
 }
 
 .pager-card:hover,
 .pager-card:focus-visible {
-  background: color-mix(in oklab, var(--color-primary) 6%, var(--color-base-100));
+  background: color-mix(in oklab, var(--color-primary) 5%, var(--color-base-100));
   transform: translateY(-3px);
-  box-shadow: 0 16px 30px -22px rgb(15 23 42 / 0.55);
+  box-shadow: 0 20px 38px -28px rgb(15 23 42 / 0.55);
   outline: none;
+}
+
+/* hover 时发丝边让位给主色描边，两层线不叠在一起 */
+.pager-card:hover::before,
+.pager-card:focus-visible::before {
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-primary) 14%, transparent);
 }
 
 .pager-card:hover::after,
@@ -1873,157 +1946,254 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   opacity: 1;
 }
 
-/*
- * 媒体：统一比例 + object-fit: cover，不同原始比例的封面观感一致；
- * 封面像一张可以直接拿起的小样张，hover 时内部缓慢放大。
- */
+.pager-card:hover .pager-body::before,
+.pager-card:focus-visible .pager-body::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 按下时轻微回弹，给点击一个触感 */
+.pager-card:active {
+  transform: translateY(-1px) scale(0.995);
+  transition-duration: 90ms;
+}
+
+/* --------------------------------------------------------------------------
+   封面：完整比例，不裁切
+   封面框固定 5:2（与封面原图一致），img 用 contain —— 等于原样平铺，
+   一张像素也不会被切掉。若哪天换成别的比例，两侧补的底纹是
+   .pager-media 自带的同色背景 + 内描边，看起来仍是一张完整的图。
+   -------------------------------------------------------------------------- */
 .pager-media {
   grid-area: media;
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 5 / 4;
-  border-radius: 12px;
+  aspect-ratio: 5 / 2;
+  border-radius: 11px;
   overflow: hidden;
-  background: var(--color-base-200);
-  box-shadow: inset 0 0 0 1px var(--border-soft);
+  background: color-mix(in oklab, var(--color-base-200) 80%, var(--color-base-100));
+  box-shadow:
+    inset 0 0 0 1px var(--border-soft),
+    0 1px 2px -1px rgb(15 23 42 / 0.2);
+  transition: box-shadow var(--pager-dur) var(--pager-ease);
 }
 
 .pager-media img {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  /* 缓慢的「呼吸」: 只在 hover 时启动，离开时慢慢退回去 */
   transition: transform 620ms var(--ease-out);
+  transition-delay: 120ms;
 }
 
-/* 正文：标题两行 + 等宽日期 */
+/* 封面左（右）边一条高光，呼应卡片的扫光方向 */
+.pager-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    100deg,
+    transparent 62%,
+    color-mix(in oklab, #fff 34%, transparent) 82%,
+    transparent 100%
+  );
+  opacity: 0;
+  transform: translateX(-30%);
+  transition:
+    opacity 420ms var(--ease-out),
+    transform 760ms var(--ease-out);
+  transition-delay: 60ms;
+  pointer-events: none;
+}
+
+.pager-card:hover .pager-media,
+.pager-card:focus-visible .pager-media {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--color-primary) 26%, transparent),
+    0 10px 22px -16px rgb(15 23 42 / 0.5);
+}
+
+/* 1.03：contain 下保证四边不露白的最小放大 */
+.pager-card:hover .pager-media img,
+.pager-card:focus-visible .pager-media img {
+  transform: scale(1.03);
+}
+
+.pager-card:hover .pager-media::after,
+.pager-card:focus-visible .pager-media::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* --------------------------------------------------------------------------
+   正文：类型微标签 / 标题 / 日期 + 方向
+   -------------------------------------------------------------------------- */
 .pager-body {
   grid-area: body;
+  position: relative;
   display: grid;
   gap: 5px;
+  align-self: end;
   min-width: 0;
 }
 
+.pager-tag {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px 2px 6px;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--color-primary) 10%, transparent);
+  color: color-mix(in oklab, var(--color-primary) 86%, var(--color-base-content));
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.pager-tag::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.75;
+}
+
 .pager-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   font-size: 15.5px;
   font-weight: 600;
   line-height: 1.42;
   letter-spacing: -0.01em;
   color: var(--color-base-content);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  transition: color var(--dur-fast) var(--ease-out);
+  transition: color var(--pager-dur) var(--pager-ease);
 }
 
+/* 日期行：等宽数字 + 一条短线，把「数据感」和方向线索放在同一行 */
 .pager-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
   font-family: var(--font-mono);
   font-size: 11.5px;
   line-height: 1.5;
   letter-spacing: 0.04em;
   color: var(--text-muted);
+  transition: color var(--pager-dur) var(--pager-ease);
 }
 
-/*
- * 方向区：文字与箭头并排、文字不换行，贴在卡片外侧端；
- * 箭头指向中缝方向（「更新的」向左、「更早」向右），信息流方向一眼可读。
- */
+.pager-meta::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.45;
+  transition:
+    width var(--pager-dur) var(--pager-ease),
+    opacity var(--pager-dur) var(--ease-out),
+    background-color var(--pager-dur) var(--pager-ease);
+}
+
+/* 日期行尾的小箭头：hover 时才显形，做方向的第二个线索（不抢标题） */
+.pager-meta-arrow {
+  display: inline-grid;
+  place-items: center;
+  width: 0;
+  margin-left: -3px;
+  color: var(--color-primary);
+  opacity: 0;
+  overflow: hidden;
+  transform: translateX(-3px);
+  transition:
+    width 260ms var(--pager-ease),
+    margin-left 260ms var(--pager-ease),
+    opacity 200ms var(--ease-out),
+    transform 320ms var(--ease-out);
+  transition-delay: 40ms;
+}
+
+.pager-card:hover .pager-meta::before,
+.pager-card:focus-visible .pager-meta::before {
+  width: 22px;
+  opacity: 0.9;
+  background: var(--color-primary);
+}
+
+.pager-card:hover .pager-meta-arrow,
+.pager-card:focus-visible .pager-meta-arrow {
+  width: 11px;
+  margin-left: 0;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* --------------------------------------------------------------------------
+   方向区：收进日期行下方，右（左）对齐到卡片外缘
+   箭头只有 24px 的小圆，但它是整张卡唯一带「位移」的动效元素，
+   视觉重量足够；键盘聚焦时外层卡片同时出现主色描边，不会只靠 hover 才可见。
+   -------------------------------------------------------------------------- */
 .pager-dir {
   grid-area: dir;
   justify-self: end;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   line-height: 1.3;
-  letter-spacing: 0.02em;
-  color: var(--color-primary);
+  letter-spacing: 0.03em;
+  color: color-mix(in oklab, var(--color-primary) 88%, var(--color-base-content));
   white-space: nowrap;
+}
+
+.pager-dir-label {
+  transition: opacity var(--pager-dur) var(--ease-out);
 }
 
 .pager-arrow {
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 9999px;
   color: var(--text-muted);
-  background: color-mix(in oklab, var(--color-base-200) 80%, var(--color-base-100));
+  background: color-mix(in oklab, var(--color-base-200) 76%, var(--color-base-100));
   box-shadow: inset 0 0 0 1px var(--border-soft);
   transition:
-    color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-spring);
+    color 220ms var(--ease-out),
+    background-color 220ms var(--ease-out),
+    box-shadow 220ms var(--ease-out),
+    transform 340ms var(--ease-spring);
+  transition-delay: 90ms;
 }
 
-/*
- * 「更早」镜像：媒体与方向对调。用 grid 容器的 direction 一次翻转，
- * 比逐项 justify-self 更稳（areas 重置、缺媒体时都不会错位）；正文再设回 LTR。
- */
-.pager-next {
-  grid-template-columns: auto minmax(0, 1fr) 148px;
-  grid-template-areas: "dir body media";
-  direction: rtl;
-}
-
-/*
- * RTL 只让列顺序翻转；正文及其内部两个 span 都要显式设回 LTR ——
- * 只设 .pager-body 时等宽日期仍是 RTL，右对齐跑到标题右侧。
- */
-.pager-next .pager-body,
-.pager-next .pager-title,
-.pager-next .pager-meta {
-  direction: ltr;
-  text-align: start;
-  justify-items: start;
-}
-
-/* 没有媒体时整块消失，正文吃掉那一列 */
-.pager-card:not(:has(.pager-media)) {
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "body dir";
-}
-
-.pager-next:not(:has(.pager-media)) {
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-areas: "dir body";
-}
-
-/* 单栏满宽：媒体放大到 240px，方向仍靠右 */
-.pager.pager-single .pager-card,
-.pager.pager-single .pager-next {
-  grid-template-columns: 240px minmax(0, 1fr) auto;
-  grid-template-areas: "media body dir";
-  column-gap: 20px;
-  direction: ltr;
-}
-
-.pager.pager-single .pager-media {
-  aspect-ratio: 16 / 10;
-}
-
-/* hover 动效 */
 .pager-card:hover .pager-title,
 .pager-card:focus-visible .pager-title {
   color: var(--color-primary);
-}
-
-.pager-card:hover .pager-media img,
-.pager-card:focus-visible .pager-media img {
-  transform: scale(1.07);
 }
 
 .pager-card:hover .pager-arrow,
 .pager-card:focus-visible .pager-arrow {
   color: #fff;
   background: var(--color-primary);
-  box-shadow: inset 0 0 0 1px var(--color-primary), 0 6px 14px -8px var(--color-primary);
+  box-shadow:
+    inset 0 0 0 1px var(--color-primary),
+    0 8px 16px -10px color-mix(in oklab, var(--color-primary) 80%, transparent);
 }
 
+/* 箭头沿「去往的方向」轻推一下：更新的向左、更早的向右 */
 .pager-prev:hover .pager-arrow,
 .pager-prev:focus-visible .pager-arrow {
   transform: translateX(-4px);
@@ -2034,44 +2204,139 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   transform: translateX(4px);
 }
 
+/* --------------------------------------------------------------------------
+   「更早」镜像
+   用网格容器的 direction 一次翻转列序，比逐项 justify-self 更稳；
+   但每个网格项都要显式设回 LTR —— 只设 .pager-body 时等宽日期仍是 RTL，
+   右对齐后会跑到标题右边。
+   -------------------------------------------------------------------------- */
+.pager-next {
+  grid-template-columns: minmax(0, 1fr) var(--pager-media, 152px);
+  grid-template-areas:
+    "body media"
+    "dir media";
+  direction: rtl;
+}
+
+.pager-next .pager-body,
+.pager-next .pager-title,
+.pager-next .pager-meta {
+  direction: ltr;
+  text-align: start;
+}
+
+.pager-next .pager-dir {
+  justify-self: start;
+}
+
+/* 镜像侧的类型小点贴在标题右侧，和封面对齐；文字仍从左边起排 */
+.pager-next .pager-tag {
+  direction: ltr;
+  justify-self: end;
+}
+
+.pager-next .pager-tag::before {
+  order: 2;
+}
+
+/* 没有封面时整块消失，正文吃掉那一列 */
+.pager-card:not(:has(.pager-media)) {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "body"
+    "dir";
+}
+
+/* 方向在缺封面时也靠到外侧端 */
+.pager-card:not(:has(.pager-media)) .pager-dir {
+  justify-self: end;
+}
+
+.pager-next:not(:has(.pager-media)) .pager-dir {
+  justify-self: start;
+}
+
+/* 单栏满宽：封面占比收一点，避免变成一张巨幅横图 */
+.pager.pager-single .pager-card {
+  /* 封面上限锁到 5:2 的高度 112px，避免宽栏里被拉成一条巨幅横图 */
+  --pager-media: min(280px, 44%);
+  grid-template-columns: var(--pager-media) minmax(0, 1fr);
+  grid-template-areas:
+    "media body"
+    "media dir";
+  column-gap: 20px;
+  padding: 16px;
+  direction: ltr;
+}
+
+/* 触屏设备没有 hover，按下时直接给出同款反馈 */
+@media (hover: none) {
+  .pager-card:active {
+    background: color-mix(in oklab, var(--color-primary) 5%, var(--color-base-100));
+    transform: translateY(-2px);
+  }
+
+  .pager-card:active::after {
+    opacity: 1;
+  }
+
+  .pager-card:active .pager-arrow {
+    color: #fff;
+    background: var(--color-primary);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   窄屏：封面缩到 96px 仍完整，方向文字收起只留箭头
+   -------------------------------------------------------------------------- */
 @media (max-width: 640px) {
-  /* 窄屏统一：媒体在左、正文在右、方向在右端 */
   .pager-card,
   .pager-next,
-  .pager.pager-single .pager-card,
-  .pager.pager-single .pager-next {
-    grid-template-columns: 96px minmax(0, 1fr) auto;
-    grid-template-areas: "media body dir";
+  .pager.pager-single .pager-card {
+    --pager-media: 96px;
+    grid-template-columns: var(--pager-media) minmax(0, 1fr);
+    grid-template-areas:
+      "media body"
+      "media dir";
     column-gap: 12px;
     padding: 12px;
+    border-radius: 16px;
     direction: ltr;
   }
 
-  .pager-media,
-  .pager.pager-single .pager-media {
-    aspect-ratio: 1 / 1;
-    border-radius: 10px;
+  .pager-media {
+    border-radius: 9px;
   }
 
   .pager-title {
     font-size: 14.5px;
   }
-}
 
-@media (max-width: 420px) {
-  /* 更省空间：媒体列收窄到 80px */
-  .pager-card,
-  .pager-next,
-  .pager.pager-single .pager-card,
-  .pager.pager-single .pager-next {
-    grid-template-columns: 80px minmax(0, 1fr) auto;
-    column-gap: 10px;
+  .pager-tag {
+    display: none;
   }
 
-  /* 极窄屏：方向区只留箭头，宽度让给标题；标题回到 14px 保证能完整断行 */
   .pager-dir {
     gap: 0;
     font-size: 0;
+  }
+
+  .pager-dir-label {
+    /* 视觉隐藏，保留给读屏与搜索索引 */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 380px) {
+  .pager-card,
+  .pager-next,
+  .pager.pager-single .pager-card {
+    --pager-media: 84px;
   }
 
   .pager-title {
@@ -2079,52 +2344,88 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   }
 }
 
+/* 减弱动效偏好：去掉位移、缩放、扫光，只保留颜色与描边 */
+@media (prefers-reduced-motion: reduce) {
+  .pager-card:hover,
+  .pager-card:focus-visible,
+  .pager-card:active {
+    transform: none;
+  }
+
+  .pager-card:hover .pager-media img,
+  .pager-card:focus-visible .pager-media img {
+    transform: none;
+  }
+
+  .pager-card:hover .pager-media::after,
+  .pager-card:focus-visible .pager-media::after,
+  .pager-card:hover .pager-body::before,
+  .pager-card:focus-visible .pager-body::before {
+    opacity: 1;
+    transform: none;
+  }
+
+  .pager-body::before {
+    display: none;
+  }
+
+  .pager-prev:hover .pager-arrow,
+  .pager-prev:focus-visible .pager-arrow,
+  .pager-next:hover .pager-arrow,
+  .pager-next:focus-visible .pager-arrow {
+    transform: none;
+  }
+}
+
 /* --------------------------------------------------------------------------
-   翻页卡片的容器查询：按「卡片所在正文栏」的真实宽度切换
-   - 正文栏 >= 700px：两卡并排（镜像布局）
-   - 更窄：单栏堆叠，媒体回到左侧
-   正文栏宽在 640–820px 之间（常见于有右侧目录的详情页）、却比整个视口窄，
-   用视口媒体查询判断会一页两卡、一页单列，观感不统一。
+   容器查询：按「卡片所在正文栏」的真实宽度切换
+   - 正文栏 >= 700px：两卡并排（镜像），封面按 38% 自适应
+   - 更窄：单栏堆叠，封面固定 148px，方向停在右侧
+   详情页正文栏只有 ~642px（右侧有目录），比整个视口窄得多；
+   用视口宽度判断会出现一页并排、一页单列，观感不统一。
    -------------------------------------------------------------------------- */
 @container (max-width: 699px) {
-  /* 单栏：媒体 148px 与双栏同尺寸同比例，裁切方式和观感完全一致 */
   .pager {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .pager-card,
   .pager-next,
-  .pager.pager-single .pager-card,
-  .pager.pager-single .pager-next {
-    grid-template-columns: 148px minmax(0, 1fr) auto;
-    grid-template-areas: "media body dir";
+  .pager.pager-single .pager-card {
+    --pager-media: 148px;
+    grid-template-columns: var(--pager-media) minmax(0, 1fr);
+    grid-template-areas:
+      "media body"
+      "media dir";
     direction: ltr;
+  }
+
+  .pager-next .pager-dir {
+    justify-self: end;
   }
 }
 
 /*
- * 容器查询和媒体查询同属「条件规则」，谁也不比谁优先 —— 写在同一层时，
- * 窄屏的 80px 媒体列会被 .related-section 的单栏规则覆盖，档位就串了。
- * 所以用外层媒体查询把窄屏兜住，窄屏下媒体列固定 80 / 96px。
+ * 容器查询与媒体查询同属条件规则，层叠上谁也不优先 —— 写在同一层时，
+ * 窄屏的 96 / 84px 封面列会被上面这条单栏规则覆盖，档位就串了。
+ * 所以用外层媒体查询把窄屏柱住。
  */
 @media (max-width: 640px) {
   @container (max-width: 699px) {
     .pager-card,
     .pager-next,
-    .pager.pager-single .pager-card,
-    .pager.pager-single .pager-next {
-      grid-template-columns: 96px minmax(0, 1fr) auto;
+    .pager.pager-single .pager-card {
+      --pager-media: 96px;
     }
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 380px) {
   @container (max-width: 699px) {
     .pager-card,
     .pager-next,
-    .pager.pager-single .pager-card,
-    .pager.pager-single .pager-next {
-      grid-template-columns: 80px minmax(0, 1fr) auto;
+    .pager.pager-single .pager-card {
+      --pager-media: 84px;
     }
   }
 }
