@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSiteConfig } from "@/lib/site";
 import { articleJsonLd, breadcrumbJsonLd, buildMetadata, JsonLd } from "@/lib/seo";
-import { getAllChatters, getChatter, toPlainText } from "@/content/chatters";
+import { chatterExcerpt, getAllChatters, getChatter, toPlainText } from "@/content/chatters";
 import { getAllArticles, getArticle } from "@/content/articles";
 import { Markdown } from "@/components/Markdown";
 import { SidebarRecommend } from "@/components/DetailAside";
@@ -111,8 +111,8 @@ export default async function ChatterPage({ params }: { params: Promise<{ slug: 
             <footer className="mt-10 border-t pt-5" style={{ borderColor: "var(--border-soft)" }}>
               <ArticlePager
                 label="杂谈翻页"
-                prev={newer ? { href: `/chatters/${newer.slug}/`, title: newer.title, meta: newer.date } : null}
-                next={older ? { href: `/chatters/${older.slug}/`, title: older.title, meta: older.date } : null}
+                prev={newer ? { href: `/chatters/${newer.slug}/`, title: newer.title, meta: newer.date, cover: "/images/covers/chatter.svg", tag: "杂谈", summary: chatterExcerpt(newer) } : null}
+                next={older ? { href: `/chatters/${older.slug}/`, title: older.title, meta: older.date, cover: "/images/covers/chatter.svg", tag: "杂谈", summary: chatterExcerpt(older) } : null}
                 prevLabel="更新的一则"
                 nextLabel="更早的一则"
               />

@@ -121,8 +121,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
               <ArticlePager
                 label="文章翻页"
-                prev={newer ? { href: `/articles/${newer.slug}/`, title: newer.title, meta: newer.date, cover: newer.cover } : null}
-                next={older ? { href: `/articles/${older.slug}/`, title: older.title, meta: older.date, cover: older.cover } : null}
+                prev={newer ? { href: `/articles/${newer.slug}/`, title: newer.title, meta: newer.date, cover: newer.cover, tag: newer.tags[0], summary: newer.summary } : null}
+                next={older ? { href: `/articles/${older.slug}/`, title: older.title, meta: older.date, cover: older.cover, tag: older.tags[0], summary: older.summary } : null}
                 prevLabel="更新的文章"
                 nextLabel="更早的文章"
               />

@@ -68,6 +68,8 @@ export interface PagerItem {
   cover?: string;
   /** 可选类型微标签，例如「开源项目」「复盘」 */
   tag?: string;
+  /** 可选摘要，仅单侧满宽时展示（并排时空间不够，会挤掉标题） */
+  summary?: string;
 }
 
 /** 单个翻页卡片：方向标签 + 箭头徽标 + 缩略图 + 标题 + 副标题 */
@@ -103,6 +105,7 @@ function PagerCard({
       <span className="pager-body">
         {item.tag ? <span className="pager-tag">{item.tag}</span> : null}
         <span className="pager-title">{item.title}</span>
+        {item.summary ? <span className="pager-summary">{item.summary}</span> : null}
         <span className="pager-meta">
           {item.meta}
           <span className="pager-meta-arrow" aria-hidden="true">

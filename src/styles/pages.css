@@ -1438,8 +1438,6 @@ html[data-motion="reduced"] .section-kicker.justify-center {
 }
 
 .related-section {
-  /* 作为翻页卡片的容器查询锚点，见文件末尾的 @container */
-  container-type: inline-size;
   margin-top: 56px;
   padding-top: 32px;
   border-top: 1px solid var(--border-soft);
@@ -1670,90 +1668,156 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   padding: 0;
 }
 
+/* --------------------------------------------------------------------------
+   相关项目卡片
+   卡片本身是一个「外壳」，里面用三列 + 三行排布：
+     ① ::before / ::after 用 inset 画出常态描边与 hover 主色描边 —— 不用 border，
+        因为 border 变色在暗色下会闪一下，而且 1px 变化会挤动内容
+     ② 缩略图跨满三行：它的高度由卡片内容决定，不再反过来拉高卡片
+     ③ 箭头单独占一列、垂直居中 —— 之前它跟在正文流里，正文越长越往下掉，
+        两张卡的箭头就对不齐了
+   -------------------------------------------------------------------------- */
 .related-project {
-  display: flex;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  /* 两行：缩略图跨两行居中，正文占第一行，箭头钉在右下角。
+     箭头之所以单独一行，是因为单行三列时它垂直居中、会随正文行数浮动 ——
+     两张卡一高一矮，箭头就对不齐了。放进固定高度的底行，它永远距底边等距。 */
+  grid-template-columns: 112px minmax(0, 1fr) 32px;
+  grid-template-rows: minmax(0, 1fr) 32px;
+  grid-template-areas:
+    "thumb body  body"
+    "thumb arrow arrow";
   align-items: center;
-  gap: 14px;
+  gap: 0 14px;
   padding: 12px;
   border-radius: 14px;
-  border: 1px solid var(--border-soft);
   background: color-mix(in oklab, var(--color-base-200) 55%, var(--color-base-100));
   color: inherit;
   text-decoration: none;
   transition:
-    border-color var(--dur-micro) var(--ease-out),
     background-color var(--dur-micro) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
-.related-project:hover {
-  border-color: var(--primary-line);
+.related-project::before,
+.related-project::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.related-project::before {
+  box-shadow: inset 0 0 0 1px var(--border-soft);
+}
+
+.related-project::after {
+  box-shadow: inset 0 0 0 1.4px var(--primary-line);
+  opacity: 0;
+}
+
+.related-project:hover,
+.related-project:focus-visible {
   background: color-mix(in oklab, var(--color-primary) 5%, var(--color-base-100));
-  transform: translateX(3px);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px -24px rgb(15 23 42 / 0.55);
+  outline: none;
 }
 
+.related-project:hover::after,
+.related-project:focus-visible::after {
+  opacity: 1;
+}
+
+/*
+ * 缩略图：和翻页卡同一套封面规矩 —— 5:2 原比例、完整不裁切。
+ * 宽度同时写在 grid-template-columns 里；只给 width:112px 时，
+ * 自动列宽仍按内容撑（img 的 1000 宽），图会溢出压到正文上。
+ */
 .related-project-thumb {
-  flex: none;
-  width: 112px;
+  grid-area: thumb;
+  position: relative;
+  align-self: center;
+  display: block;
+  width: 100%;
   aspect-ratio: 5 / 2;
   border-radius: 9px;
   overflow: hidden;
-  background: var(--color-base-200);
-  border: 1px solid var(--border-soft);
+  background: color-mix(in oklab, var(--color-base-200) 80%, var(--color-base-100));
+  box-shadow:
+    inset 0 0 0 1px var(--border-soft),
+    0 1px 2px -1px rgb(15 23 42 / 0.2);
 }
 
 .related-project-thumb img {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 600ms var(--ease-out);
+  object-fit: contain;
+  transition: transform 620ms var(--ease-out);
+  transition-delay: 80ms;
 }
 
-.related-project:hover .related-project-thumb img {
-  transform: scale(1.06);
+.related-project:hover .related-project-thumb img,
+.related-project:focus-visible .related-project-thumb img {
+  transform: scale(1.04);
 }
 
 .related-project-body {
+  grid-area: body;
+  align-self: start;
   display: grid;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 
+/* 元信息：等宽数字 + 中点，日期和类型同一行读完 */
 .related-project-meta {
   display: flex;
+  align-items: center;
   gap: 6px;
   font-family: var(--font-mono);
   font-size: 11px;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
   color: var(--text-muted);
 }
 
 .related-project-title {
   font-size: 15px;
   font-weight: 600;
-  line-height: 1.45;
+  line-height: 1.42;
+  letter-spacing: -0.01em;
   color: var(--color-base-content);
+  transition: color var(--dur-micro) var(--ease-out);
 }
 
-.related-project:hover .related-project-title {
+.related-project:hover .related-project-title,
+.related-project:focus-visible .related-project-title {
   color: var(--color-primary);
 }
 
 .related-project-summary {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--text-muted);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-muted);
 }
 
 .related-project-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .related-project-tags .chip {
@@ -1761,8 +1825,11 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   padding: 4px 8px;
 }
 
+/* 箭头：固定在右下角，距底边等距 —— 卡片高矮不同也不会错位 */
 .related-project-arrow {
-  flex: none;
+  grid-area: arrow;
+  align-self: end;
+  justify-self: end;
   display: grid;
   place-items: center;
   width: 32px;
@@ -1770,31 +1837,61 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   border-radius: 9999px;
   color: var(--text-muted);
   background: var(--color-base-100);
-  border: 1px solid var(--border-soft);
+  box-shadow: inset 0 0 0 1px var(--border-soft);
   transition:
-    color var(--dur-micro) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    border-color var(--dur-micro) var(--ease-out);
+    color 220ms var(--ease-out),
+    background-color 220ms var(--ease-out),
+    box-shadow 220ms var(--ease-out),
+    transform 320ms var(--ease-spring);
+  transition-delay: 40ms;
 }
 
-.related-project:hover .related-project-arrow {
-  color: var(--color-primary);
-  border-color: var(--primary-line);
+.related-project:hover .related-project-arrow,
+.related-project:focus-visible .related-project-arrow {
+  color: #fff;
+  background: var(--color-primary);
+  box-shadow:
+    inset 0 0 0 1px var(--color-primary),
+    0 8px 16px -10px color-mix(in oklab, var(--color-primary) 80%, transparent);
   transform: translateX(3px);
 }
 
+/* 窄屏：缩略图保留在左上，箭头跟着沉到底部右侧 */
 @media (max-width: 560px) {
   .related-project {
-    flex-wrap: wrap;
+    grid-template-columns: 88px minmax(0, 1fr) 28px;
+    grid-template-areas:
+      "thumb body body"
+      "thumb body arrow";
+    align-items: center;
+    gap: 0 12px;
   }
 
   .related-project-thumb {
     width: 100%;
-    aspect-ratio: 5 / 2;
   }
 
   .related-project-arrow {
-    display: none;
+    width: 26px;
+    height: 26px;
+  }
+
+  .related-project-summary {
+    -webkit-line-clamp: 3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .related-project:hover,
+  .related-project:focus-visible {
+    transform: none;
+  }
+
+  .related-project:hover .related-project-thumb img,
+  .related-project:focus-visible .related-project-thumb img,
+  .related-project:hover .related-project-arrow,
+  .related-project:focus-visible .related-project-arrow {
+    transform: none;
   }
 }
 
@@ -2047,7 +2144,9 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   display: grid;
   gap: 8px;
   align-self: center;
+  /* 并排卡片里封面 + 箭头已占近一半，正文必须能被压缩，否则会撑爆卡片 */
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .pager-tag {
@@ -2073,6 +2172,22 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   border-radius: 9999px;
   background: currentColor;
   opacity: 0.8;
+}
+
+/* 摘要：只在单侧满宽时出现，并排时 display:none（见 .pager-single） */
+.pager-summary {
+  display: none;
+  margin-top: 2px;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.pager.pager-single .pager-summary {
+  display: -webkit-box;
 }
 
 .pager-title {
@@ -2241,6 +2356,10 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   justify-self: start;
 }
 
+.pager-next .pager-dir-label {
+  order: -1;
+}
+
 /* 镜像侧的类型小点贴在标题右侧，和封面对齐；文字仍从左边起排 */
 .pager-next .pager-tag {
   direction: ltr;
@@ -2389,14 +2508,22 @@ html[data-motion="reduced"] .section-kicker.justify-center {
   }
 }
 
+/* 容器查询锚点：翻页卡片的单侧卡文案是否放得下，取决于它所在正文栏的宽度。
+   ⚠️ 锚点必须紧挨着 .pager 的祖先链 —— 放在 .related-section 上没用，
+   因为详情页的翻页区在 <footer class="mt-10"> 里、根本不是 related-section 的后代，
+   那样整段 @container 永远不会命中。 */
+.detail-grid > .pager-shell {
+  container-type: inline-size;
+}
+
 /* --------------------------------------------------------------------------
    容器查询：按「卡片所在正文栏」的真实宽度切换
-   - 正文栏 >= 700px：两卡并排（镜像），封面按 38% 自适应
+   - 正文栏 >= 560px：两卡并排（镜像），封面按 38% 自适应
    - 更窄：单栏堆叠，封面固定 148px，方向停在右侧
    详情页正文栏只有 ~642px（右侧有目录），比整个视口窄得多；
    用视口宽度判断会出现一页并排、一页单列，观感不统一。
    -------------------------------------------------------------------------- */
-@container (max-width: 699px) {
+@container (max-width: 559px) {
   .pager {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -2419,25 +2546,26 @@ html[data-motion="reduced"] .section-kicker.justify-center {
 
 /*
  * 容器查询与媒体查询同属条件规则，层叠上谁也不优先 —— 写在同一层时，
- * 窄屏的 96 / 84px 封面列会被上面这条单栏规则覆盖，档位就串了。
- * 所以用外层媒体查询把窄屏柱住。
+ * 下面这两条封面宽度会被上面那条单栏规则（148px）盖掉，档位就串了。
+ * 所以用外层媒体查询把它们柱住：窄屏卡片占满整栏后，封面按比例吃一部分
+ * 宽度（固定 96px 在 316px 的栏里又小又空）。
  */
 @media (max-width: 640px) {
-  @container (max-width: 699px) {
+  @container (max-width: 559px) {
     .pager-card,
     .pager-next,
     .pager.pager-single .pager-card {
-      --pager-media: 96px;
+      --pager-media: min(148px, 42%);
     }
   }
 }
 
 @media (max-width: 380px) {
-  @container (max-width: 699px) {
+  @container (max-width: 559px) {
     .pager-card,
     .pager-next,
     .pager.pager-single .pager-card {
-      --pager-media: 84px;
+      --pager-media: 38%;
     }
   }
 }
